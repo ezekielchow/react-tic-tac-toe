@@ -11,7 +11,8 @@ class Game extends React.Component {
             }],
             xIsNext: true,
             stepNumber: 0,
-            movePositions: []
+            movePositions: [],
+            showMovesDecending: false
         };
     }
 
@@ -51,6 +52,12 @@ class Game extends React.Component {
         return `Row:${row} Column:${column}`;
     }
 
+    handleReorderMoves(){
+        this.setState({
+            showMovesDecending: !this.state.showMovesDecending
+        });
+    }
+
     render(){
         const history = this.state.history;
         const current = history[this.state.stepNumber];
@@ -71,6 +78,11 @@ class Game extends React.Component {
             );
         })
 
+        // reorder if moves sorted
+        const movesReordered = (this.state.showMovesDecending) ?
+            moves.slice(0).reverse() :
+            moves;
+
         let status;
         if(winner){
             status = 'Winner: ' + winner;
@@ -88,7 +100,11 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
-                    <div>{moves}</div>
+                    <button
+                        onClick={() => this.handleReorderMoves()}>
+                        {"Reorder Moves"}
+                    </button>
+                    <div>{movesReordered}</div>
                 </div>
             </div>
         )
