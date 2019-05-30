@@ -52,3 +52,7 @@ ol, ul {
 .bolded {
   font-weight: bold;
 }
+
+.colored {
+  background: yellow;
+}
