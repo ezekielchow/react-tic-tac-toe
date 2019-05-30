@@ -1,69 +1,280 @@
 # react-tic-tac-toe
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+This is my solutions to [React Tutorial](https://reactjs.org/tutorial/tutorial.html) improvements suggested
 
-In the project directory, you can run:
+## Getting Started
 
-### `npm start`
+```
+git clone https://github.com/ezekielchow/react-tic-tac-toe.git
+cd react-tic-tac-toe
+npm install
+npm start
+```
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Solutions
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+### 1. Display the location for each move in the format (col, row) in the move history list
 
-### `npm test`
+* On every step taken, we append the position to movePositions which is stored in the state.
+* When rendering the list of items, we pass move to getRowColumn to be used as the index to get the positions stored. Which then, will return the formatted Row and Column string.
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+//Game.js
+handleClick(i){
+    ...
+    this.setState({
+        history: history.concat([{
+            squares:squares,
+        }]),
+        stepNumber: history.length,
+        xIsNext: !this.state.xIsNext,
+        movePositions: this.state.movePositions.slice(0, this.state.stepNumber).concat([i]),
+    });
+}
 
-### `npm run build`
+getRowColumn(move){
+    const movePosition = this.state.movePositions[move - 1];
+    const row = Math.ceil((movePosition + 1) / 3);
+    const column = 1 + movePosition % 3;
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    return `Row:${row} Column:${column}`;
+}
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+render(){
+    const history = this.state.history;
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    const moves = history.map((step, move) => {
+        const desc = move ?
+            `Go to move #${move} ${this.getRowColumn(move)}`:
+            'Go to game start';
+        return (
+            <li key={move}>
+                <button
+                    className={(this.state.stepNumber === move) ? 'bolded' : ''}
+                    onClick={() => this.jumpTo(move)}>
+                    {desc}
+                </button>
+            </li>
+        );
+    });
+}
 
-### `npm run eject`
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 2. Bold the currently selected item in the move list
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+* On every step taken, we also update the stepNumber which is the amount of histories
+* We have a css that bolds the text
+* When rendering the list of moves, if we are at that move, bold the button's text
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+//Game.js
+handleClick(i){
+    ...
+    this.setState({
+        history: history.concat([{
+            squares:squares,
+        }]),
+        stepNumber: history.length,
+        xIsNext: !this.state.xIsNext,
+        movePositions: this.state.movePositions.slice(0, this.state.stepNumber).concat([i]),
+    });
+}
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+render(){
+    ...
+    const moves = history.map((step, move) => {
+        const desc = move ?
+            `Go to move #${move} ${this.getRowColumn(move)}`:
+            'Go to game start';
+        return (
+            <li key={move}>
+                <button
+                    className={(this.state.stepNumber === move) ? 'bolded' : ''}
+                    onClick={() => this.jumpTo(move)}>
+                    {desc}
+                </button>
+            </li>
+        );
+    });
+}
+```
 
-## Learn More
+### 3. Rewrite Board to use two loops to make the squares instead of hardcoding them
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* In the original, the rendered squares are hardcoded
+* In the second loop, we will create the neccessary squares for each row
+* In the first loop, we will add the squares to each row
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+//Board.js
+renderSquare(i) {
+    return (
+        <Square
+            isWinner={this.props.winnersLocation ? this.props.winnersLocation.includes(i) : false}
+            key={i}
+            value={this.props.squares[i]}
+            onClick={() => this.props.onClick(i)}
+        />
+    );
+}
 
-### Code Splitting
+getSquaresForBoard(rows, columns)
+{
+    let board = [];
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+    for(let i = 0; i < rows; i++){
 
-### Analyzing the Bundle Size
+        let squares = [];
+        for(let x = 0; x < columns; x++){
+            squares.push(this.renderSquare(i * columns + x));
+        }
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+        board.push(<div key={i} className="board-row">{squares}</div>);
+    }
 
-### Making a Progressive Web App
+    return board;
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+render() {
+    return (
+    <div>
+        {this.getSquaresForBoard(3,3)}
+    </div>
+    );
+}
+```
 
-### Advanced Configuration
+### 4. Add a toggle button that lets you sort the moves in either ascending or descending order
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+* We add a button to reorder moves
+* Once click we update the state to be the opposite for showMovesDecending
+* Using the state, we show the original moves. Or reverse it before showing
 
-### Deployment
+```
+//Game.js
+render(){
+    ...
+    handleReorderMoves(){
+        this.setState({
+            showMovesDecending: !this.state.showMovesDecending
+        });
+    }
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+    return(
+        <div className="game">
+            ...
+            <div className="game-info">
+                <div>{status}</div>
+                <button
+                    onClick={() => this.handleReorderMoves()}>
+                    {"Reorder Moves"}
+                </button>
+                <div>
+                    {
+                        (this.state.showMovesDecending) ?
+                        moves.slice(0).reverse() :
+                        moves
+                    }
+                </div>
+            </div>
+        </div>
+    )
+}
+```
 
-### `npm run build` fails to minify
+### 5. When someone wins, highlight the three squares that caused the win
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+* We update calculateWinner to return the position of the squares who won
+* We then pass down the locations to the renderSquare function in Board
+* If there is a winner and the square is one of the winners, pass winner to Square
+* If there are winners passed by props, then color the square
+
+```
+//Game.js
+function calculateWinner(squares) {
+    ...
+    for (let i = 0; i < lines.length; i++) {
+        const [a, b, c] = lines[i];
+        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return [a, b, c];
+        }
+    }
+    return null;
+}
+
+render(){
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    ...
+    return(
+        <div className="game">
+            <div className="game-board">
+                <Board
+                    winnersLocation={winner}
+                    squares={current.squares}
+                    onClick={(i) => this.handleClick(i)}
+                />
+            </div>
+            ...
+        </div>
+    )
+}
+```
+
+```
+//Board.js
+renderSquare(i) {
+    return (
+    <Square
+        isWinner={this.props.winnersLocation ? this.props.winnersLocation.includes(i) : false}
+        key={i}
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+    />
+    );
+}
+```
+
+```
+//Square.js
+function Square(props) {
+    return (
+        <button
+            className={"square " +
+            (props.isWinner ? "colored" : "")}
+            onClick={props.onClick}
+        >
+        {props.value}
+        </button>
+    );
+}
+```
+
+### 6. When no one wins, display a message about the result being a draw
+* We check for the end of the game, which only can a draw happen
+* If there is no winner, definitely it is a draw, which we will show as the status
+
+```
+//Game.js
+render(){
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+    const draw = (history[history.length - 1].squares.includes(null)) ? false : true;
+
+    ...
+    let status;
+    if(winner){
+        status = 'Winner: ' + winner;
+    }else if (draw){
+        status = 'Draw';
+    }else{
+        status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+
+    ...
+}
+```

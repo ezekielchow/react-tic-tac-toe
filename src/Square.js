@@ -3,10 +3,11 @@ import React from 'react';
 function Square(props) {
     return (
         <button
-        className={"square " +
+            className={"square " +
             (props.isWinner ? "colored" : "")}
-            onClick={props.onClick}>
-            {props.value}
+            onClick={props.onClick}
+        >
+        {props.value}
         </button>
     );
 }
