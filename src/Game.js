@@ -64,6 +64,7 @@ class Game extends React.Component {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
         const winner = calculateWinner(current.squares);
+        const draw = (history[history.length - 1].squares.includes(null)) ? false : true;
 
         const moves = history.map((step, move) => {
             const desc = move ?
@@ -80,14 +81,11 @@ class Game extends React.Component {
             );
         })
 
-        // reorder if moves sorted
-        const movesReordered = (this.state.showMovesDecending) ?
-            moves.slice(0).reverse() :
-            moves;
-
         let status;
         if(winner){
             status = 'Winner: ' + winner;
+        }else if (draw){
+            status = 'Draw';
         }else{
             status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
@@ -107,7 +105,13 @@ class Game extends React.Component {
                         onClick={() => this.handleReorderMoves()}>
                         {"Reorder Moves"}
                     </button>
-                    <div>{movesReordered}</div>
+                    <div>
+                        {
+                            (this.state.showMovesDecending) ?
+                            moves.slice(0).reverse() :
+                            moves
+                        }
+                    </div>
                 </div>
             </div>
         )
