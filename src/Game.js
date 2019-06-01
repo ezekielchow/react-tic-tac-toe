@@ -14,6 +14,7 @@ class Game extends React.Component {
             movePositions: [],
             showMovesDecending: false,
         };
+        this.handleClick = this.handleClick.bind(this);
     }
 
     handleClick(i){
@@ -96,7 +97,7 @@ class Game extends React.Component {
                     <Board
                         winnersLocation={winner}
                         squares={current.squares}
-                        onClick={(i) => this.handleClick(i)}
+                        onClick={this.handleClick}
                     />
                 </div>
                 <div className="game-info">
